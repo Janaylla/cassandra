@@ -2,12 +2,13 @@
 
 Este documento fornece instruções passo a passo para configurar um ambiente Cassandra usando Docker e o Cassandra Query Language (CQL).
 
-## 1. Criando um container Cassandra com Docker:
+## 1. Criando os containers Cassandra com Docker:
 
 O comando a seguir cria um container Docker executando o Cassandra. Ele também mapeia a porta 9042 do container para a porta 9042 do host.
 
 ```bash
-docker run -d --name cassandra-docker -p 9042:9042 cassandra
+docker-compose up -d
+
 ```
 
 Por quê: Isso inicia um container Cassandra em segundo plano, permitindo que você interaja com ele posteriormente.
@@ -16,21 +17,9 @@ Por quê: Isso inicia um container Cassandra em segundo plano, permitindo que vo
 Este comando permite acessar o shell dentro do container Cassandra recém-criado.
 
 ```bash
-docker exec -it cassandra-docker bash
-```
-
-## 3. Removendo dados antigos do Cassandra (opcional):
-Se necessário, este comando remove qualquer diretório de dados antigos do Cassandra.
-
-```bash
 rm -Rf ~/.cassandra
-```
+docker exec -it cassandra1 cqlsh
 
-## 4. Acessando o shell do CQL (Cassandra Query Language):
-Este comando inicia o shell CQL, que permite executar comandos para interagir com o banco de dados Cassandra.
-
-```bash
-cqlsh
 ```
 
 Por quê: Isso permite que você crie keyspaces, tabelas e execute consultas no Cassandra usando a linguagem CQL.
@@ -39,7 +28,7 @@ Por quê: Isso permite que você crie keyspaces, tabelas e execute consultas no 
 Este comando cria um keyspace chamado user_data com uma estratégia de replicação SimpleStrategy e um fator de replicação de 1.
 
 ```bash
-CREATE KEYSPACE IF NOT EXISTS user_data
+CREATE KEYSPACE IF NOT EXISTS example_keyspace
 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 ```
 
@@ -50,16 +39,15 @@ Este comando seleciona o keyspace user_data para que todas as operações subseq
 c
 
 ```clq
-Copy code
-USE user_data;
+USE example_keyspace;;
 ```
 Por quê: Isso define o keyspace padrão para o contexto atual, para que as operações de criação de tabela e consulta sejam aplicadas a este keyspace.
 
 ## 7. Criando uma tabela:
-Este comando cria uma tabela chamada user_profiles com três colunas: id (UUID), name (Texto) e email (Texto). A coluna id é definida como a chave primária.
+Este comando cria uma tabela chamada users com três colunas: id (UUID), name (Texto) e email (Texto). A coluna id é definida como a chave primária.
 
 ```clq
-CREATE TABLE IF NOT EXISTS user_profiles (
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     name TEXT,
     email TEXT
@@ -117,4 +105,19 @@ npm run start
 ### 10.2 Abrar o arquivo html no seu navegador
 ```bash
 start index.html
-```
+
+docker exec -it cassandra-node1 bash
+sed -i 's/^listen_address.*$/listen_address: cassandra-node1/' ./etc/cassandra/cassandra.yaml
+sed -i 's/^rpc_address.*$/rpc_address: 0.0.0.0/' ./etc/cassandra/cassandra.yaml
+sed -i 's/- seeds: "127.0.0.1"/- seeds: "cassandra-node1"/' ./etc/cassandra/cassandra.yaml
+
+docker exec -it cassandra-node2 bash
+sed -i 's/^listen_address.*$/listen_address: cassandra-node2/' ./etc/cassandra/cassandra.yaml
+sed -i 's/^rpc_address.*$/rpc_address: 0.0.0.0/' ./etc/cassandra/cassandra.yaml
+sed -i 's/- seeds: "127.0.0.1"/- seeds: "cassandra-node1"/' ./etc/cassandra/cassandra.yaml
+
+docker exec -it cassandra-node3  bash
+sed -i 's/^listen_address.*$/listen_address: cassandra-node3/' ./etc/cassandra/cassandra.yaml
+sed -i 's/^rpc_address.*$/rpc_address: 0.0.0.0/' /etc/cassandra/cassandra.yaml
+sed -i 's/- seeds: "127.0.0.1"/- seeds: "cassandra-node1"/' ./etc/cassandra/cassandra.yaml
+``

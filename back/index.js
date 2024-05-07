@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 const client = new Client({
   contactPoints: ['127.0.0.1'], // Endereço IP do nó Cassandra
   localDataCenter: 'datacenter1', // Nome do datacenter local
-  keyspace: 'user_data' // Nome do keyspace
+  keyspace: 'example_keyspace', // Nome do keyspace
 });
 
 
@@ -25,7 +25,7 @@ client.connect()
 // Rota para obter todos os perfis de usuários
 app.get('/users', async (req, res) => {
   try {
-    const result = await client.execute('SELECT * FROM user_profiles');
+    const result = await client.execute('SELECT * FROM users');
     res.json(result.rows);
   } catch (err) {
     console.error('Erro ao obter perfis de usuários:', err);
@@ -37,7 +37,7 @@ app.get('/users', async (req, res) => {
 app.post('/users', async (req, res) => {
   const { id, name, email } = req.body;
   try {
-    const query = 'INSERT INTO user_profiles (id, name, email) VALUES (?, ?, ?)';
+    const query = 'INSERT INTO users (id, name, email) VALUES (?, ?, ?)';
     const id = uuidv4()
     await client.execute(query, [id, name, email]);
     res.status(201).send('Perfil de usuário criado com sucesso');
@@ -50,7 +50,7 @@ app.post('/users', async (req, res) => {
 app.delete('/users/:id', async (req, res) => {
   const userId = req.params.id;
   try {
-    const query = 'DELETE FROM user_profiles WHERE id = ?';
+    const query = 'DELETE FROM users WHERE id = ?';
     await client.execute(query, [userId]);
     res.status(200).send('Perfil de usuário excluído com sucesso');
   } catch (err) {
