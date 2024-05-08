@@ -21,7 +21,6 @@ rm -Rf ~/.cassandra
 docker exec -it cassandra1 cqlsh
 
 ```
-
 Por quê: Isso permite que você crie keyspaces, tabelas e execute consultas no Cassandra usando a linguagem CQL.
 
 ## 5. Criando um keyspace:
@@ -39,7 +38,7 @@ Este comando seleciona o keyspace user_data para que todas as operações subseq
 c
 
 ```clq
-USE example_keyspace;;
+USE example_keyspace;
 ```
 Por quê: Isso define o keyspace padrão para o contexto atual, para que as operações de criação de tabela e consulta sejam aplicadas a este keyspace.
 
